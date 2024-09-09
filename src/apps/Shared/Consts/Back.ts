@@ -1,1 +1,1 @@
-export const BACKEND ="http://localhost:3000"
+export const BACKEND ="http://taskmanager-back-w5dt.onrender.com"
