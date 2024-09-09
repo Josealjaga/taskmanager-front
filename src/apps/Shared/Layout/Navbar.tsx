@@ -5,7 +5,7 @@ import usuario from '../../../../public/usuario.png';
 
 type NavbarProps = object & React.ComponentPropsWithRef<'header'>;
 
-const Navbar: FC<NavbarProps> = ({ ref }) => {
+const Navbar: FC<NavbarProps> = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
