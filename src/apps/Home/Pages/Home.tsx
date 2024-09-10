@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { BACKEND } from '../../Shared/Consts/Back';
 import { ClipboardList, Activity, CheckCircle2, Calendar, Flag, Folder } from 'lucide-react';
-import {useNavigate,} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface Task {
   id: string;
@@ -18,6 +18,8 @@ type KanbanBoardProps = object;
 const KanbanBoard: FC<KanbanBoardProps> = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [filterDate, setFilterDate] = useState<string>('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +35,6 @@ const KanbanBoard: FC<KanbanBoardProps> = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data.data);
           setTasks(data.data);
         } else {
           console.error('Error fetching tasks:', response.statusText);
@@ -50,8 +51,24 @@ const KanbanBoard: FC<KanbanBoardProps> = () => {
     setSelectedTask(task);
   };
 
-  const getTasksByStatus = (status: Task['status']) =>
-    tasks.filter((task) => task.status === status);
+  const getTasksByStatus = (status: Task['status']) => {
+    let filteredTasks = tasks.filter((task) => task.status === status);
+
+    // Aplicar filtro por prioridad
+    if (filterPriority !== 'all') {
+      filteredTasks = filteredTasks.filter((task) => task.priority === filterPriority);
+    }
+
+    // Aplicar filtro por fecha
+    if (filterDate !== 'all') {
+      filteredTasks = filteredTasks.filter((task) => {
+        const taskDate = new Date(task.finishdate).toLocaleDateString();
+        return taskDate === filterDate;
+      });
+    }
+
+    return filteredTasks;
+  };
 
   const getPriorityColor = (priority: Task['priority']) => {
     switch (priority) {
@@ -90,11 +107,10 @@ const KanbanBoard: FC<KanbanBoardProps> = () => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${sessionStorage.getItem('user_token')}`,
       },
-    })
+    });
     setSelectedTask(null);
     window.location.reload();
-  }
-
+  };
 
   return (
     <div className='p-6 min-h-screen bg-[#bbebdf] bg-auto bg-center bg-no-repeat'>
@@ -106,6 +122,33 @@ const KanbanBoard: FC<KanbanBoardProps> = () => {
           Crear tarea
         </button>
       </div>
+
+      {/* Filtros */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <label className="mr-2">Filtrar por prioridad:</label>
+          <select
+            value={filterPriority}
+            onChange={(e) => setFilterPriority(e.target.value)}
+            className="p-2 border rounded"
+          >
+            <option value="all">Todas</option>
+            <option value="low">Baja</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+          </select>
+        </div>
+        <div>
+          <label className="mr-2">Filtrar por fecha:</label>
+          <input
+            type="date"
+            value={filterDate === 'all' ? '' : filterDate}
+            onChange={(e) => setFilterDate(e.target.value ? new Date(e.target.value).toLocaleDateString() : 'all')}
+            className="p-2 border rounded"
+          />
+        </div>
+      </div>
+
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Tablero de Tareas</h1>
       <div className="flex space-x-6 overflow-x-auto pb-8 justify-center">
         {['todo', 'doing', 'completed'].map((status) => (
