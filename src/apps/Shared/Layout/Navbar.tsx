@@ -37,7 +37,7 @@ const Navbar: FC<NavbarProps> = () => {
           }}
           className="text-2xl font-primary font-bold"
         >
-          <img src={logo} alt="Hotel Logo" className="h-[300px]" />
+          <img src={logo} alt="logo" className="h-[200px]" />
         </a>
         <div className="relative">
           <img
